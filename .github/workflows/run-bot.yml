@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"  # Restart elke 5 uur
+    - cron: "0 */5 * * *"  # Restart every 5 hours
 
 jobs:
   run-bot:
@@ -29,9 +29,9 @@ jobs:
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      - name: Remove Eval section from config.yml
+      - name: Replace Eval address with localhost
         run: |
-          sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
+          sed -i "s|address: 'kaboom.pw:25565'|address: 'localhost'|" config.yml
 
       - name: Start Discord Bot
         run: |
