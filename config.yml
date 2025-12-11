@@ -73,8 +73,13 @@ colorPalette:
   number: 'gold'
   ownerName: 'green'
 
+
+  eval:
+  address: 'localhost'
+
+
 # you HAVE TO CHANGE THIS if you are hosting another instance of my bot.
-ownerName: 'LOL'
+ownerName: 'Juro5000'
 
 consoleChatFormat: '{"translate":"chat.type.text","with":["OWNER_NAME","MESSAGE"]}'
 
