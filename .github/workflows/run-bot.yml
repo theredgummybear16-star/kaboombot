@@ -2,8 +2,6 @@ name: Run ChomeNS Discord Bot
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 */5 * * *"  # draait elke 5 uur
 
 jobs:
   run-bot:
@@ -11,13 +9,8 @@ jobs:
     timeout-minutes: 350
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Enable Git LFS
-        run: |
-          git lfs install
-          git lfs pull
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -26,24 +19,21 @@ jobs:
           java-version: '21'
 
       - name: Inject Discord token
-        run: |
-          sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
+        run: sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      - name: Remove Eval & unsupported fields
+      - name: Remove eval plugin references
         run: |
           sed -i '/^eval:/d' config.yml
           sed -i '/^  op:/d' config.yml
-          sed -i '/^  gamemode:/d' config.yml
-          sed -i '/^  respawn:/d' config.yml
 
-      - name: Start dummy Eval server
+      - name: Start dummy Eval server (safe)
         run: |
           mkdir -p .github/eval
           echo "const http = require('http');" > .github/eval/server.js
           echo "http.createServer((req,res)=>{res.end('ok');}).listen(3000);" >> .github/eval/server.js
           nohup node .github/eval/server.js &
 
-      - name: Start ChomeNS Discord Bot
+      - name: Start ChomeNS Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
           while true; do
