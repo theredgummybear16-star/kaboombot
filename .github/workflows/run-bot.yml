@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"
+    - cron: "0 */5 * * *"  # Herstart elke 5 uur
 
 jobs:
   run-bot:
@@ -11,28 +11,45 @@ jobs:
     timeout-minutes: 350
 
     steps:
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Enable Git LFS
       - name: Enable Git LFS
         run: |
           git lfs install
           git lfs pull
 
+      # 3. Install Java
       - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      # 4. Inject Discord token
       - name: Inject Discord token into config.yml
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      - name: Remove Eval section from config.yml
+      # 5. Add minimal Eval section pointing to localhost to prevent crashes
+      - name: Add minimal Eval section
         run: |
+          # Remove existing eval block if present
           sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
+          # Append minimal eval block at the end
+          echo "eval:" >> config.yml
+          echo "  address: 'localhost'" >> config.yml
 
+      # 6. Remove unsupported core fields (op, gamemode, respawn)
+      - name: Clean unsupported core fields
+        run: |
+          sed -i '/^  op:/d' config.yml
+          sed -i '/^  gamemode:/d' config.yml
+          sed -i '/^  respawn:/d' config.yml
+
+      # 7. Start the bot
       - name: Start Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
