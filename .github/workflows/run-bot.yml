@@ -31,8 +31,7 @@ jobs:
 
       - name: Remove Eval section from config.yml
         run: |
-          awk '/^eval:/{flag=1;next}/^[^[:space:]]/{flag=0} !flag' config.yml > config.tmp.yml
-          mv config.tmp.yml config.yml
+          sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
 
       - name: Start Discord Bot
         run: |
