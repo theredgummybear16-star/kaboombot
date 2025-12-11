@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"
+    - cron: "0 */5 * * *"  # Restart elke 5 uur
 
 jobs:
   run-bot:
@@ -29,18 +29,9 @@ jobs:
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      - name: Install yq
-        run: sudo apt-get update && sudo apt-get install -y yq
-
       - name: Remove Eval section from config.yml
         run: |
-          yq eval 'del(.eval)' -i config.yml
-
-      - name: Remove unsupported core fields
-        run: |
-          sed -i '/^  op:/d' config.yml
-          sed -i '/^  gamemode:/d' config.yml
-          sed -i '/^  respawn:/d' config.yml
+          sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
 
       - name: Start Discord Bot
         run: |
