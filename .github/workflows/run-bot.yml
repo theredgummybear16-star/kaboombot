@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"  # Herstart elke 5 uur
+    - cron: "0 */5 * * *"  # Restart every 5 hours
 
 jobs:
   run-bot:
@@ -28,10 +28,6 @@ jobs:
       - name: Inject Discord token into config.yml
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
-
-      - name: Fix Eval address so bot doesn't crash
-        run: |
-          sed -i "s|address: 'kaboom.pw:25565'|address: 'localhost'|" config.yml
 
       - name: Start Discord Bot
         run: |
