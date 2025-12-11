@@ -74,7 +74,7 @@ colorPalette:
   ownerName: 'green'
 
 
-  eval:
+eval:
   address: 'localhost'
 
 
