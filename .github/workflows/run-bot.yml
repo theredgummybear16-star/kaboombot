@@ -53,11 +53,12 @@ jobs:
           sed -i '/^  gamemode:/d' config.yml
           sed -i '/^  respawn:/d' config.yml
 
-      # 8. Start Eval-server in isolated Docker container
+      # 8. Start Eval-server in isolated Docker container (veilig, alleen lokaal bereikbaar)
       - name: Start Eval server container
         run: |
-          docker run -d --name eval-server \
-            -p 127.0.0.1:3000:3000 \   # Alleen lokaal bereikbaar
+          docker run -d \
+            --name eval-server \
+            -p 127.0.0.1:3000:3000 \
             -v ${{ github.workspace }}/eval-server.js:/eval-server.js \
             node:20 node /eval-server.js
 
