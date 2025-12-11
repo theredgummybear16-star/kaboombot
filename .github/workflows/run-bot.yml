@@ -9,9 +9,6 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 350
-    container:
-      image: node:20  # Node.js container voor Eval-server
-      options: --network host
 
     steps:
       # 1. Checkout repository
@@ -31,33 +28,40 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      # 4. Inject Discord token
-      - name: Inject Discord token into config.yml
+      # 4. Install Node.js on runner
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 5. Inject Discord token into config.yml
+      - name: Inject Discord token
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      # 5. Configure Eval to point to localhost
-      - name: Set Eval address
+      # 6. Configure Eval to point to localhost
+      - name: Configure Eval
         run: |
           sed -i '/^eval:/d' config.yml
           echo "eval:" >> config.yml
           echo "  address: 'localhost:3000'" >> config.yml
 
-      # 6. Remove unsupported core fields
+      # 7. Remove unsupported core fields
       - name: Clean unsupported core fields
         run: |
           sed -i '/^  op:/d' config.yml
           sed -i '/^  gamemode:/d' config.yml
           sed -i '/^  respawn:/d' config.yml
 
-      # 7. Start Eval-server in background
-      - name: Start Eval server
+      # 8. Start Eval-server in isolated Docker container
+      - name: Start Eval server container
         run: |
-          echo "Starting Eval server..."
-          node eval-server.js &
-          sleep 5  # wacht tot server klaar is
+          docker run -d --name eval-server \
+            -p 127.0.0.1:3000:3000 \   # Alleen lokaal bereikbaar
+            -v ${{ github.workspace }}/eval-server.js:/eval-server.js \
+            node:20 node /eval-server.js
 
-      # 8. Start Discord Bot in loop (herstart bij crash)
+      # 9. Start ChomeNS Bot with auto-restart
       - name: Start Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
