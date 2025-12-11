@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"  # Herstart elke 5 uur
+    - cron: "0 */5 * * *"  # Restart every 5 hours
 
 jobs:
   run-bot:
@@ -27,12 +27,12 @@ jobs:
 
       - name: Inject Discord token into config.yml
         run: |
-          # Maak een kopie van config.yml
-          cp config.yml config.temp.yml
-          # Vervang de regel met token
-          sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.temp.yml
-          # Vervang het originele config.yml
-          mv config.temp.yml config.yml
+          sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
+
+      - name: Disable Eval Plugin completely
+        run: |
+          # Remove Eval plugin so it doesn’t crash
+          sed -i "/^eval:/,+1 s/address: .*/address: 'localhost'/" config.yml
 
       - name: Start Discord Bot
         run: |
