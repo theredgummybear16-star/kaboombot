@@ -18,6 +18,11 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Setup Node.js (for Eval server)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       - name: Inject Discord token
         run: sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
@@ -26,7 +31,7 @@ jobs:
           sed -i '/^eval:/d' config.yml
           sed -i '/^  op:/d' config.yml
 
-      - name: Start dummy Eval server (safe)
+      - name: Start safe dummy Eval server
         run: |
           mkdir -p .github/eval
           echo "const http = require('http');" > .github/eval/server.js
