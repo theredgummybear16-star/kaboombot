@@ -101,8 +101,6 @@ core:
   customName: '[{"text":"Core ","color":"yellow"},{"text":"core","color":"green"},{"text":"core","color":"gold"}]'
 
 # https://code.chipmunk.land/ChomeNS/eval-server
-eval:
-  address: 'kaboom.pw:25565'
 
 selfCare:
   # vanilla
