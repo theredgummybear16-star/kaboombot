@@ -1,48 +1,52 @@
 name: Run ChomeNS Discord Bot
 
+# Triggers
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Hierdoor kun je handmatig starten
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
-
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '21'
+          distribution: temurin
 
-      - name: Setup Node.js (for Eval server)
+      - name: Set up Node.js (for isolated eval)
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Inject Discord token
-        run: sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
-
-      - name: Remove eval plugin references
+      - name: Build bot (if needed)
         run: |
-          sed -i '/^eval:/d' config.yml
-          sed -i '/^  op:/d' config.yml
+          echo "Building bot..."
+          # Voeg hier build commands toe, bv:
+          # ./gradlew build
 
-      - name: Start safe dummy Eval server
+      - name: Start Node.js eval container
         run: |
-          mkdir -p .github/eval
-          echo "const http = require('http');" > .github/eval/server.js
-          echo "http.createServer((req,res)=>{res.end('ok');}).listen(3000);" >> .github/eval/server.js
-          nohup node .github/eval/server.js &
+          docker run -d --name eval-server \
+            --restart unless-stopped \
+            -p 3000:3000 \
+            -e NODE_ENV=production \
+            -v ${{ github.workspace }}:/usr/src/app \
+            node:20 tail -f /dev/null
 
-      - name: Start ChomeNS Bot
+      - name: Run ChomeNS Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
-          while true; do
-            java -jar chomens_bot-rolling-all.jar || true
-            echo "Bot crashed, restarting in 5s..."
-            sleep 5
-          done
+          java -jar bot.jar # pas aan naar jouw jar-bestand naam
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker stop eval-server
+          docker rm eval-server
