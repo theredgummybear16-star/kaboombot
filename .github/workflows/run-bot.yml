@@ -2,59 +2,56 @@ name: Run ChomeNS Discord Bot
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 */5 * * *"  # Herstart elke 5 uur
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    services:
+      node:
+        image: node:20
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd="curl -f http://localhost:3000 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        # Hier zou je eventueel een eval-server script kunnen starten
+        # Bijvoorbeeld via command: node /workspace/eval-server.js
 
     steps:
-      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Enable Git LFS
       - name: Enable Git LFS
         run: |
           git lfs install
           git lfs pull
 
-      # 3. Install Java
       - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # 4. Inject Discord token
-      - name: Inject Discord token into config.yml
+      - name: Inject Discord token
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      # 5. Force Eval to localhost (harmless)
-      - name: Force Eval to localhost
+      - name: Set Eval address to localhost
         run: |
-          # Remove any existing eval block
-          sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
-          # Add minimal eval block pointing to localhost
+          sed -i '/^eval:/d' config.yml
           echo "eval:" >> config.yml
-          echo "  address: 'localhost'" >> config.yml
+          echo "  address: 'localhost:3000'" >> config.yml
 
-      # 6. Remove unsupported core fields
-      - name: Clean unsupported core fields
+      - name: Remove unsupported core fields
         run: |
           sed -i '/^  op:/d' config.yml
           sed -i '/^  gamemode:/d' config.yml
           sed -i '/^  respawn:/d' config.yml
 
-      # 7. Start bot in loop, auto-restart on crash
       - name: Start Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
-          while true; do
-            java -jar chomens_bot-rolling-all.jar || true
-            echo "Bot crashed, restarting in 5s..."
-            sleep 5
-          done
+          java -jar chomens_bot-rolling-all.jar
