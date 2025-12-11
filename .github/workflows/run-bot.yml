@@ -33,24 +33,28 @@ jobs:
         run: |
           sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
 
-      # 5. Add minimal Eval section pointing to localhost to prevent crashes
-      - name: Add minimal Eval section
+      # 5. Force Eval to localhost (harmless)
+      - name: Force Eval to localhost
         run: |
-          # Remove existing eval block if present
+          # Remove any existing eval block
           sed -i '/^eval:/,/^[^[:space:]]/d' config.yml
-          # Append minimal eval block at the end
+          # Add minimal eval block pointing to localhost
           echo "eval:" >> config.yml
           echo "  address: 'localhost'" >> config.yml
 
-      # 6. Remove unsupported core fields (op, gamemode, respawn)
+      # 6. Remove unsupported core fields
       - name: Clean unsupported core fields
         run: |
           sed -i '/^  op:/d' config.yml
           sed -i '/^  gamemode:/d' config.yml
           sed -i '/^  respawn:/d' config.yml
 
-      # 7. Start the bot
+      # 7. Start bot in loop, auto-restart on crash
       - name: Start Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
-          java -jar chomens_bot-rolling-all.jar
+          while true; do
+            java -jar chomens_bot-rolling-all.jar || true
+            echo "Bot crashed, restarting in 5s..."
+            sleep 5
+          done
