@@ -1,17 +1,16 @@
 name: Run ChomeNS Discord Bot
 
-# Triggers
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # Hierdoor kun je handmatig starten
+  workflow_dispatch: # Handmatig triggeren
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Java
@@ -20,16 +19,10 @@ jobs:
           java-version: '21'
           distribution: temurin
 
-      - name: Set up Node.js (for isolated eval)
+      - name: Set up Node.js (voor eval)
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-
-      - name: Build bot (if needed)
-        run: |
-          echo "Building bot..."
-          # Voeg hier build commands toe, bv:
-          # ./gradlew build
 
       - name: Start Node.js eval container
         run: |
@@ -43,9 +36,9 @@ jobs:
       - name: Run ChomeNS Discord Bot
         run: |
           echo "Starting ChomeNS Discord Bot..."
-          java -jar bot.jar # pas aan naar jouw jar-bestand naam
+          java -jar chomens_bot-rolling-all.jar
 
-      - name: Clean up
+      - name: Clean up eval container
         if: always()
         run: |
           docker stop eval-server
