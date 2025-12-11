@@ -75,7 +75,7 @@ colorPalette:
 
 
 eval:
-  address: 'localhost'
+  address: 'localhost:3000'
 
 
 # you HAVE TO CHANGE THIS if you are hosting another instance of my bot.
