@@ -3,7 +3,7 @@ name: Run ChomeNS Discord Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"  # Restart every 5 hours
+    - cron: "0 */5 * * *"
 
 jobs:
   run-bot:
@@ -31,8 +31,7 @@ jobs:
 
       - name: Disable Eval Plugin completely
         run: |
-          # Remove Eval plugin so it doesn’t crash
-          sed -i "/^eval:/,+1 s/address: .*/address: 'localhost'/" config.yml
+          sed -i "/^eval:/,+1c\eval:\n  enabled: false" config.yml
 
       - name: Start Discord Bot
         run: |
