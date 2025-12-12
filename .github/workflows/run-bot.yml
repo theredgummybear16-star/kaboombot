@@ -8,7 +8,11 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 350  # Genoeg tijd voor bot run
+    timeout-minutes: 350
+
+    env:
+      # Headless en dumb terminal voor Java 21
+      JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true -Dorg.jline.terminal.dumb=true"
 
     steps:
       - name: Checkout repo with LFS
@@ -25,20 +29,21 @@ jobs:
       - name: Start dummy eval server
         run: |
           nohup bash -c "while true; do echo -e 'HTTP/1.1 200 OK\r\n\r\nOK' | nc -l -p 3000; done" &
+          echo "Dummy eval server running on port 3000"
+          sleep 2  # Wacht even zodat server ready is
 
-      - name: Inject Discord token into config
+      - name: Inject Discord token and Eval URL into config
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
+          # Inject Discord token
           sed -i "s/token: 'token hier'/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
+          # Inject Eval URL (dummy server)
+          sed -i "s|eval_url: 'url hier'|eval_url: 'http://localhost:3000'|" config.yml
+          echo "Config updated with Discord token and Eval URL."
 
-      - name: Run Bot (auto-restart on crash)
+      - name: Run Bot with debug logging
         run: |
-          export TERM=dumb  # Voorkomt terminal warnings
-          echo "Starting bot loop..."
-          while true; do
-            echo "Launching bot at $(date)"
-            java -Xmx1G -jar chomens_bot-rolling-all.jar
-            echo "Bot crashed or exited at $(date). Restarting in 10s..."
-            sleep 10
-          done
+          export TERM=dumb
+          echo "Starting bot with debug logging..."
+          java -Xmx1G -Dlog.level=DEBUG -jar chomens_bot-rolling-all.jar
