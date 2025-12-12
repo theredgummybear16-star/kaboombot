@@ -73,13 +73,8 @@ colorPalette:
   number: 'gold'
   ownerName: 'green'
 
-
-eval:
-  address: 'http://localhost:3000'
-
-
 # you HAVE TO CHANGE THIS if you are hosting another instance of my bot.
-ownerName: 'Juro5000'
+ownerName: 'LOL'
 
 consoleChatFormat: '{"translate":"chat.type.text","with":["OWNER_NAME","MESSAGE"]}'
 
@@ -106,6 +101,8 @@ core:
   customName: '[{"text":"Core ","color":"yellow"},{"text":"core","color":"green"},{"text":"core","color":"gold"}]'
 
 # https://code.chipmunk.land/ChomeNS/eval-server
+eval:
+  address: 'kaboom.pw:25565'
 
 selfCare:
   # vanilla
@@ -122,7 +119,6 @@ selfCare:
 
   # commandspy
   cspy: true
-
   # extras
   prefix:
     enabled: false
@@ -153,19 +149,22 @@ bots:
   - host: 'kaboom.pw'
     port: 25565
     serverName: 'kaboom'
-  
-#  - host: 'chipmunk.land'    # be sure to set discordChannelId and/or ircChannel here if you use the discord integration
-#    port: 25565
-#    serverName: 'chipmunk'
+    discordChannelId: '1449059562001928303'
+  - host: 'chipmunk.land'
+    port: 25565
+    serverName: 'chipmunk'
+    discordChannelId: '1449059607350743316'
 #  - host: 'ayunboom.shhnowisnottheti.me'
 #    port: 25565
-#    serverName: 'ayunboom'   
-  # or with the optional ones
-  # - host: 'localhost'
-  #   port: 25565
-  #   username: 'JuroBot'
-  #   serverName: 'Localhost'
-    discordChannelId: '1448681914419511309'
+#    serverName: 'ayunboom'
+#    discordChannelId: '1449060827587154064'
+  - host: 'chayapak.chipmunk.land'
+    port: '25565'
+    serverName: 'chayapak'
+  - host: '168.100.225.224'
+    port: 25565
+    serverName: 'NekoBoom'
+    discordChannelId: '1449059857985699962'
   #   ircChannel: '#chomens/localhost'
   #   hidden: false
   #   useCore: true
