@@ -28,6 +28,7 @@ jobs:
 
       - name: Start dummy eval server
         run: |
+          # Start een dummy server die HTTP 200 retourneert
           nohup bash -c "while true; do echo -e 'HTTP/1.1 200 OK\r\n\r\nOK' | nc -l -p 3000; done" &
           echo "Dummy eval server running on port 3000"
           sleep 2  # Wacht even zodat server ready is
@@ -36,14 +37,22 @@ jobs:
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
-          # Inject Discord token
+          # Discord token injectie
           sed -i "s/token: 'token hier'/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
-          # Inject Eval URL (dummy server)
+          # Eval URL injectie (dummy server)
           sed -i "s|eval_url: 'url hier'|eval_url: 'http://localhost:3000'|" config.yml
           echo "Config updated with Discord token and Eval URL."
+
+      - name: Disable optional plugins for testing
+        run: |
+          # Als er een plugins folder is, rename tijdelijk
+          if [ -d "plugins" ]; then
+            mv plugins plugins_disabled
+            echo "Plugins temporarily disabled for debug run."
+          fi
 
       - name: Run Bot with debug logging
         run: |
           export TERM=dumb
-          echo "Starting bot with debug logging..."
+          echo "Starting bot in debug mode..."
           java -Xmx1G -Dlog.level=DEBUG -jar chomens_bot-rolling-all.jar
