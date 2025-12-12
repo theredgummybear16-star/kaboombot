@@ -2,13 +2,13 @@ name: Run Java Bot Every 6h
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */6 * * *"  # Elke 6 uur
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 350  # Genoeg tijd voor bot run
 
     steps:
       - name: Checkout repo with LFS
@@ -25,19 +25,20 @@ jobs:
       - name: Start dummy eval server
         run: |
           nohup bash -c "while true; do echo -e 'HTTP/1.1 200 OK\r\n\r\nOK' | nc -l -p 3000; done" &
-          echo "Dummy eval server running on port 3000"
 
       - name: Inject Discord token into config
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
           sed -i "s/token: 'token hier'/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
-          echo "Discord token injected."
 
-      - name: Run Bot
+      - name: Run Bot (auto-restart on crash)
         run: |
-          echo "Starting bot using Java 21..."
-          # Forceer dumb terminal en gebruik nohup zodat de bot blijft draaien
-          export TERM=dumb
-          nohup java -Xmx1G -jar chomens_bot-rolling-all.jar > bot.log 2>&1 &
-          echo "Bot started in background. Logs are in bot.log"
+          export TERM=dumb  # Voorkomt terminal warnings
+          echo "Starting bot loop..."
+          while true; do
+            echo "Launching bot at $(date)"
+            java -Xmx1G -jar chomens_bot-rolling-all.jar
+            echo "Bot crashed or exited at $(date). Restarting in 10s..."
+            sleep 10
+          done
