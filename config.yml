@@ -102,7 +102,7 @@ core:
 
 # https://code.chipmunk.land/ChomeNS/eval-server
 eval:
-  address: 'https://localhost:3000'
+  address: 'http://localhost:3000'
 
 selfCare:
   # vanilla
