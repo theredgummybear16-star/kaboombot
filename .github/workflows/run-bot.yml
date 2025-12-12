@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repo with LFS
         uses: actions/checkout@v3
         with:
-          lfs: true     # <--- DIT FIXT JE PROBLEEM
+          lfs: true
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -22,7 +22,12 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Insert Discord token into config
+      - name: Start dummy eval server
+        run: |
+          python3 -m http.server 3000 &
+          echo "Dummy eval server running on port 3000"
+
+      - name: Inject Discord token into config
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
@@ -32,5 +37,4 @@ jobs:
       - name: Run Bot
         run: |
           echo "Starting bot using Java 21..."
-          ls -lh
           java -Xmx1G -jar chomens_bot-rolling-all.jar
