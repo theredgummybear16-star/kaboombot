@@ -1,33 +1,32 @@
-name: Run Java Bot Every 6 Hours
+name: Run Java Bot Every 6h
 
 on:
   schedule:
-    - cron: "0 */6 * * *"   # elke 6 uur
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 350     # 5u50 max
+    timeout-minutes: 350
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
-      - name: Inject Discord token into config
+      - name: Insert Discord token into config
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
-          sed -i "s/token:.*/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
-          echo "Config updated safely."
+          sed -i "s/token: 'token hier'/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
+          echo "Config patched."
 
-      - name: Run Bot
+      - name: Run bot
         run: |
-          echo "Starting bot..."
           java -Xmx1G -jar bot.jar
