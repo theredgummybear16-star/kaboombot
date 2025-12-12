@@ -1,35 +1,33 @@
-name: Run ChomeNS Discord Bot
+name: Run Java Bot Every 6 Hours
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 */5 * * *"  # Restart every 5 hours
+    - cron: "0 */6 * * *"   # elke 6 uur
+  workflow_dispatch:
 
 jobs:
-  run-bot:
+  run:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 350     # 5u50 max
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Enable Git LFS
-        run: |
-          git lfs install
-          git lfs pull
-
-      - name: Install Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: temurin
+          java-version: 17
 
-      - name: Inject Discord token into config.yml
+      - name: Inject Discord token into config
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
         run: |
-          sed -i "s|token: 'token hier'|token: '${{ secrets.DISCORD_TOKEN }}'|" config.yml
+          sed -i "s/token:.*/token: '${DISCORD_TOKEN//\//\\/}'/" config.yml
+          echo "Config updated safely."
 
-      - name: Start Discord Bot
+      - name: Run Bot
         run: |
-          echo "Starting ChomeNS Discord Bot..."
-          java -jar chomens_bot-rolling-all.jar
+          echo "Starting bot..."
+          java -Xmx1G -jar bot.jar
